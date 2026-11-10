@@ -13,7 +13,7 @@ Use this checklist before calling a skill ready.
 - [ ] The package directory matches the `name` field.
 - [ ] `SKILL.md` starts with valid YAML frontmatter.
 - [ ] Required `name` and `description` fields are present and non-empty.
-- [ ] Name is 1–64 Unicode lowercase alphanumeric characters and single hyphens, with no leading/trailing or consecutive hyphens.
+- [ ] Name is 1–64 Unicode alphanumeric characters that are lowercase under Unicode case mapping, plus single hyphens; validate after NFKC normalization and compare the normalized name with the normalized directory name.
 - [ ] Description is specific and within the 1024-character specification limit.
 - [ ] Optional metadata is valid YAML and does not rely on undocumented host behavior.
 
