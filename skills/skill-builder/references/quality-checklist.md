@@ -13,8 +13,8 @@ Use this checklist before calling a skill ready.
 - [ ] The package directory matches the `name` field.
 - [ ] `SKILL.md` starts with valid YAML frontmatter.
 - [ ] Required `name` and `description` fields are present and non-empty.
-- [ ] Name is 1–64 characters, lowercase alphanumeric plus single hyphens, with no leading/trailing or consecutive hyphens.
-- [ ] Description is concise, specific, and within the specification's length limit.
+- [ ] Name is 1–64 Unicode lowercase alphanumeric characters and single hyphens, with no leading/trailing or consecutive hyphens.
+- [ ] Description is specific and within the 1024-character specification limit.
 - [ ] Optional metadata is valid YAML and does not rely on undocumented host behavior.
 
 ## 3. Instruction quality
@@ -29,7 +29,7 @@ Use this checklist before calling a skill ready.
 - [ ] The core uses standard Markdown and Agent Skills metadata.
 - [ ] Host-specific commands, tools, paths, and metadata are isolated in adapters.
 - [ ] Required capabilities are documented rather than assumed.
-- [ ] Relative links resolve from the skill directory.
+- [ ] Relative links resolve inside the skill directory.
 - [ ] No claim of universal support is made without evidence.
 
 ## 5. Safety and reliability
@@ -49,12 +49,13 @@ Use this checklist before calling a skill ready.
 ## 7. Testing
 - [ ] A normal use case was tested.
 - [ ] An edge case was tested.
+- [ ] An adversarial or untrusted-input case was tested.
 - [ ] A failure or missing-input case was tested.
 - [ ] Referenced files and scripts were checked.
-- [ ] A standards validator was run when available, with its result recorded accurately.
+- [ ] The official validator was run when available; otherwise the limitation is explicit.
 
 ## Release decision
 
-- **Ready:** all required format and safety checks pass; no critical workflow defects remain.
+- **Ready:** format and safety gates pass, and no critical workflow defects remain.
 - **Needs revision:** a material gap, ambiguity, portability issue, or failed test remains.
 - **Blocked:** required information, permissions, or host capabilities are unavailable.
