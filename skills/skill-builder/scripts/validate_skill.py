@@ -9,21 +9,25 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 KEY_RE = re.compile(r"^([A-Za-z][A-Za-z0-9_-]*):(?:\s*(.*))?$")
 
 
 def valid_skill_name(name: str) -> bool:
-    """Apply the specification's lowercase Unicode alphanumeric + hyphen rule."""
-    if not name or len(name) > 64 or name.startswith("-") or name.endswith("-") or "--" in name:
+    """Mirror skills-ref name validation, including NFKC normalization."""
+    normalized = unicodedata.normalize("NFKC", name.strip())
+    if (
+        not normalized
+        or len(normalized) > 64
+        or normalized != normalized.lower()
+        or normalized.startswith("-")
+        or normalized.endswith("-")
+        or "--" in normalized
+    ):
         return False
-    for char in name:
-        if char == "-":
-            continue
-        if not char.isalnum() or (char.isalpha() and not char.islower()):
-            return False
-    return True
+    return all(char.isalnum() or char == "-" for char in normalized)
 
 
 def parse_frontmatter(text: str) -> tuple[dict[str, str], list[str]]:
@@ -68,9 +72,11 @@ def validate(skill_file: Path) -> list[str]:
         errors.append("Required frontmatter field 'name' is missing or empty.")
     else:
         if not valid_skill_name(name):
-            errors.append("'name' must be 1-64 lowercase Unicode alphanumeric characters and single hyphens.")
-        if skill_file.parent.name != name:
-            errors.append(f"Skill directory '{skill_file.parent.name}' must match frontmatter name '{name}'.")
+            errors.append("'name' must be 1-64 lowercase Unicode alphanumeric characters and single hyphens (after NFKC normalization).")
+        directory_name = unicodedata.normalize("NFKC", skill_file.parent.name)
+        normalized_name = unicodedata.normalize("NFKC", name.strip())
+        if directory_name != normalized_name:
+            errors.append(f"Skill directory '{skill_file.parent.name}' must match frontmatter name '{name}' after NFKC normalization.")
 
     if not description:
         errors.append("Required frontmatter field 'description' is missing or empty.")
