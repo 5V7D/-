@@ -65,7 +65,7 @@ class SkillFileTests(unittest.TestCase):
             skill_dir.mkdir()
             skill_file = skill_dir / "SKILL.md"
             skill_file.write_text(
-                "---\\nname: cafe\\u0301-helper\\ndescription: Build skills.\\n---\\n# Title\\nBody\\n",
+                "---\nname: cafe\u0301-helper\ndescription: Build skills.\n---\n# Title\nBody\n",
                 encoding="utf-8",
             )
             self.assertEqual(validate_skill.validate(skill_file), [])
