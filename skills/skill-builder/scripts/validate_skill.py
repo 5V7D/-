@@ -11,7 +11,7 @@ import re
 import sys
 from pathlib import Path
 
-KEY_RE = re.compile(r"^([A-Za-z][A-Za-z0-9_-]*):(?:\\s*(.*))?$")
+KEY_RE = re.compile(r"^([A-Za-z][A-Za-z0-9_-]*):(?:\s*(.*))?$")
 
 
 def valid_skill_name(name: str) -> bool:
