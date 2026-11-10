@@ -10,9 +10,15 @@ import validate_skill
 
 class SkillNameTests(unittest.TestCase):
     def test_valid_names(self):
-        for name in ("skill-builder", "résumé-helper", "данные-анализ", "a1-b2"):
+        for name in ("skill-builder", "résumé-helper", "данные-анализ", "技能", "a1-b2"):
             with self.subTest(name=name):
                 self.assertTrue(validate_skill.valid_skill_name(name))
+
+    def test_nfkc_equivalent_name(self):
+        self.assertTrue(validate_skill.valid_skill_name("cafe\u0301-helper"))
+
+    def test_combining_mark_without_base_is_invalid(self):
+        self.assertFalse(validate_skill.valid_skill_name("\u0301"))
 
     def test_invalid_names(self):
         for name in ("", "-bad", "bad-", "bad--name", "UPPER", "a" * 65, "two words"):
@@ -48,6 +54,18 @@ class SkillFileTests(unittest.TestCase):
             skill_file = skill_dir / "SKILL.md"
             skill_file.write_text(
                 "---\nname: skill-builder\ndescription: Build skills.\n---\n# Title\nBody\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(validate_skill.validate(skill_file), [])
+
+
+    def test_nfkc_normalization_matches_directory_name(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = Path(temp_dir) / "café-helper"
+            skill_dir.mkdir()
+            skill_file = skill_dir / "SKILL.md"
+            skill_file.write_text(
+                "---\\nname: cafe\\u0301-helper\\ndescription: Build skills.\\n---\\n# Title\\nBody\\n",
                 encoding="utf-8",
             )
             self.assertEqual(validate_skill.validate(skill_file), [])
