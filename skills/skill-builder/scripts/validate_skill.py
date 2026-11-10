@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Validate core Agent Skills naming and frontmatter requirements.
+"""Run a lightweight Agent Skills structure/frontmatter check.
 
-This dependency-free checker intentionally validates a conservative subset of
-YAML frontmatter. For full YAML/specification validation, also run skills-ref.
+This dependency-free checker validates a deliberately limited subset of YAML.
+It is not a replacement for the official `skills-ref validate` command.
 """
 from __future__ import annotations
 
@@ -11,8 +11,19 @@ import re
 import sys
 from pathlib import Path
 
-NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-KEY_RE = re.compile(r"^([A-Za-z][A-Za-z0-9_-]*):(?:\s*(.*))?$")
+KEY_RE = re.compile(r"^([A-Za-z][A-Za-z0-9_-]*):(?:\\s*(.*))?$")
+
+
+def valid_skill_name(name: str) -> bool:
+    """Apply the specification's lowercase Unicode alphanumeric + hyphen rule."""
+    if not name or len(name) > 64 or name.startswith("-") or name.endswith("-") or "--" in name:
+        return False
+    for char in name:
+        if char == "-":
+            continue
+        if not char.isalnum() or (char.isalpha() and not char.islower()):
+            return False
+    return True
 
 
 def parse_frontmatter(text: str) -> tuple[dict[str, str], list[str]]:
@@ -20,7 +31,6 @@ def parse_frontmatter(text: str) -> tuple[dict[str, str], list[str]]:
     lines = text.splitlines()
     if not lines or lines[0].strip() != "---":
         return {}, ["SKILL.md must begin with YAML frontmatter opening '---'."]
-
     try:
         end = next(i for i in range(1, len(lines)) if lines[i].strip() == "---")
     except StopIteration:
@@ -37,7 +47,7 @@ def parse_frontmatter(text: str) -> tuple[dict[str, str], list[str]]:
         key, value = match.groups()
         if key in fields:
             errors.append(f"Duplicate frontmatter field '{key}' on line {number}.")
-        fields[key] = (value or "").strip().strip("'\"")
+        fields[key] = (value or "").strip().strip("'\\\"")
     return fields, errors
 
 
@@ -48,32 +58,28 @@ def validate(skill_file: Path) -> list[str]:
     if not skill_file.is_file():
         return errors + [f"File does not exist: {skill_file}"]
 
-    fields, parse_errors = parse_frontmatter(skill_file.read_text(encoding="utf-8"))
+    content = skill_file.read_text(encoding="utf-8")
+    fields, parse_errors = parse_frontmatter(content)
     errors.extend(parse_errors)
-
     name = fields.get("name", "")
     description = fields.get("description", "")
+
     if not name:
         errors.append("Required frontmatter field 'name' is missing or empty.")
     else:
-        if len(name) > 64:
-            errors.append("'name' must be at most 64 characters.")
-        if not NAME_RE.fullmatch(name):
-            errors.append("'name' must use lowercase letters, digits, and single hyphens only.")
+        if not valid_skill_name(name):
+            errors.append("'name' must be 1-64 lowercase Unicode alphanumeric characters and single hyphens.")
         if skill_file.parent.name != name:
-            errors.append(
-                f"Skill directory '{skill_file.parent.name}' must match frontmatter name '{name}'."
-            )
+            errors.append(f"Skill directory '{skill_file.parent.name}' must match frontmatter name '{name}'.")
 
     if not description:
         errors.append("Required frontmatter field 'description' is missing or empty.")
     elif len(description) > 1024:
         errors.append("'description' must be at most 1024 characters.")
 
-    body = skill_file.read_text(encoding="utf-8").split("---", 2)
-    if len(body) < 3 or not body[2].strip():
+    parts = content.split("---", 2)
+    if len(parts) < 3 or not parts[2].strip():
         errors.append("Markdown instruction body after frontmatter must not be empty.")
-
     return errors
 
 
@@ -89,7 +95,7 @@ def main() -> int:
             print(f"- {error}")
         return 1
     print(f"VALIDATION PASSED: {skill_file}")
-    print("Note: this lightweight checker is not a full YAML parser or official conformance validator.")
+    print("Limited local check only; run skills-ref validate for full specification validation.")
     return 0
 
 
