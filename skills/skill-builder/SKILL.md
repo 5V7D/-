@@ -62,7 +62,7 @@ Create a skill directory whose name matches the `name` frontmatter value.
 The portable `SKILL.md` must:
 - Begin with YAML frontmatter
 - Include non-empty `name` and `description`
-- Use a valid name: 1–64 Unicode lowercase alphanumeric characters and single hyphens; no leading, trailing, or consecutive hyphens
+- Use a valid name: 1–64 Unicode alphanumeric characters that are lowercase under Unicode case mapping, plus single hyphens; no leading, trailing, or consecutive hyphens. Apply NFKC normalization when validating the name and comparing it with the directory name, matching `skills-ref`.
 - Describe both capability and activation conditions in `description`
 - Give actionable instructions, not vague aspirations
 - Define inputs, outputs, workflow, edge cases, and stop/approval conditions where relevant
