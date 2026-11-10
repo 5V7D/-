@@ -34,6 +34,7 @@ Use this checklist before calling a skill ready.
 
 ## 5. Safety and reliability
 - [ ] Destructive or externally visible actions require appropriate approval.
+- [ ] Existing-file replacements require inspection, a clear explanation and proposed diff/replacement, then explicit confirmation before writing.
 - [ ] Secrets and personal data are excluded.
 - [ ] Untrusted content is treated as data, not authority.
 - [ ] Scripts have bounded scope, clear dependencies, and useful errors.
